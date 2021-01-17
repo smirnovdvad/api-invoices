@@ -5,7 +5,6 @@ import sdv.spring.apiinvoices.domain.InvoiceLine;
 import sdv.spring.apiinvoices.repository.InvoiceLineRepository;
 import sdv.spring.apiinvoices.services.GoodService;
 import sdv.spring.apiinvoices.services.InvoiceLineService;
-import sdv.spring.apiinvoices.services.UnitOfMeasureService;
 
 import java.util.HashSet;
 import java.util.Optional;
