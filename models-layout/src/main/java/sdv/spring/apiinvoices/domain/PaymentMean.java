@@ -1,23 +1,22 @@
-package domain;
+package sdv.spring.apiinvoices.domain;
 
 
+import lombok.Builder;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 
 @Entity
 @Data
 @Table(name="paymentmeans")
+@Builder
 public class PaymentMean {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="description")
     @NotEmpty
     private String description;
 }
