@@ -1,8 +1,10 @@
 package sdv.spring.apiinvoices.domain;
 
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -11,6 +13,8 @@ import javax.validation.constraints.NotEmpty;
 @Data
 @Table(name="paymentmeans")
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class PaymentMean {
 
     @Id

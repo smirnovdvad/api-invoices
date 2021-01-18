@@ -14,7 +14,8 @@ import java.util.Set;
 @Service
 public class InvoiceJPAService implements InvoiceService {
 
-    public InvoiceJPAService(InvoiceRepository invoiceRepository, CompanyService companyService, InvoiceLineService invoiceLineService, PaymentMeanService paymentMeanService, GoodService goodService) {
+    public InvoiceJPAService(InvoiceRepository invoiceRepository, CompanyService companyService, InvoiceLineService invoiceLineService,
+                             PaymentMeanService paymentMeanService, GoodService goodService) {
         this.invoiceRepository = invoiceRepository;
         this.companyService = companyService;
         this.invoiceLineService = invoiceLineService;

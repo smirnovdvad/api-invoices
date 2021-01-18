@@ -1,7 +1,9 @@
 package sdv.spring.apiinvoices.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -10,6 +12,8 @@ import javax.validation.constraints.NotEmpty;
 @Table(name="goods")
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Good {
 
     @Id
@@ -23,6 +27,4 @@ public class Good {
     @JoinColumn(name="uom_id")
     private UnitOfMeasure uom;
 
-//    @OneToOne
-//    private InvoiceLine invoiceLine;
 }

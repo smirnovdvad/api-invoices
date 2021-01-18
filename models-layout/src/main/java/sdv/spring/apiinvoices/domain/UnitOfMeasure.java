@@ -1,5 +1,6 @@
 package sdv.spring.apiinvoices.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,8 @@ import javax.validation.constraints.NotEmpty;
 @Table(name="uom")
 @Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UnitOfMeasure {
 
     @Id
@@ -23,8 +26,5 @@ public class UnitOfMeasure {
 
     @NotEmpty
     private String description;
-
-//    @OneToOne
-//    private Good good;
 
 }
