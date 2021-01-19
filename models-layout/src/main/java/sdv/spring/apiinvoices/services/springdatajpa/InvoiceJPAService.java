@@ -4,15 +4,25 @@ import sdv.spring.apiinvoices.domain.Company;
 import sdv.spring.apiinvoices.domain.Invoice;
 import org.springframework.stereotype.Service;
 import sdv.spring.apiinvoices.domain.PaymentMean;
+import sdv.spring.apiinvoices.exception.InvoiceNotFoundException;
+import sdv.spring.apiinvoices.mapper.InvoiceMapper;
+import sdv.spring.apiinvoices.model.InvoiceDTO;
 import sdv.spring.apiinvoices.repository.InvoiceRepository;
 import sdv.spring.apiinvoices.services.*;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.swing.*;
+import javax.swing.text.html.Option;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class InvoiceJPAService implements InvoiceService {
+
+    private InvoiceMapper invoiceMapper = InvoiceMapper.INSTANCE;
 
     public InvoiceJPAService(InvoiceRepository invoiceRepository, CompanyService companyService, InvoiceLineService invoiceLineService,
                              PaymentMeanService paymentMeanService, GoodService goodService) {
@@ -86,5 +96,51 @@ public class InvoiceJPAService implements InvoiceService {
     @Override
     public void deleteById(Long aLong) {
         invoiceRepository.deleteById(aLong);
+    }
+
+    @Override
+    public InvoiceDTO postInvoiceDTO(InvoiceDTO invoiceDTO) {
+        return invoiceMapper.invoiceToInvoiceDTO(save(
+                invoiceMapper.invoiceDtoToInvoice(invoiceDTO)
+        ));
+    }
+
+    @Override
+    public Set<InvoiceDTO> getAllInvoicesDTO() {
+        HashSet<InvoiceDTO> resInvoicesDTO = new HashSet<>();
+        findAll().forEach(
+                invoice -> {
+                    resInvoicesDTO.add(invoiceMapper.invoiceToInvoiceDTO(invoice));
+                }
+        );
+        return resInvoicesDTO;
+    }
+
+    @Override
+    public InvoiceDTO putInvoiceDTO(InvoiceDTO invoiceDTO) {
+        Invoice invoice = invoiceMapper.invoiceDtoToInvoice(invoiceDTO);
+        Optional<Invoice> optInvoice = invoiceRepository.findByNumber(invoice.getNumber());
+        if (optInvoice.isPresent())
+            invoice.setId(optInvoice.get().getId());
+
+        return invoiceMapper.invoiceToInvoiceDTO(invoiceRepository.save(invoice));
+    }
+
+    @Override
+    public InvoiceDTO getInvoiceDTOByNumber(String aInvNumber) {
+        Optional<Invoice> optInvoice = invoiceRepository.findByNumber(aInvNumber);
+        if (optInvoice.isPresent())
+            return invoiceMapper.invoiceToInvoiceDTO(optInvoice.get());
+        else
+            throw new InvoiceNotFoundException("Invoice does not exist");
+    }
+
+    @Override
+    public Invoice findByNumber(String aInvNumber) {
+        Optional<Invoice> optInvoice = invoiceRepository.findByNumber(aInvNumber);
+        if (optInvoice.isPresent())
+            return optInvoice.get();
+        else
+            throw new InvoiceNotFoundException("Invoice does not exist");
     }
 }

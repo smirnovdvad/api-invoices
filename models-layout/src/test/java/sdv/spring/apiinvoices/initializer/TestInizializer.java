@@ -1,6 +1,7 @@
 package sdv.spring.apiinvoices.initializer;
 
 import sdv.spring.apiinvoices.domain.*;
+import sdv.spring.apiinvoices.model.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -27,6 +28,16 @@ public abstract class TestInizializer {
     public Long invoiceId = 55L;
     public LocalDate invoiceDate = LocalDate.now();
 
+    public CompanyDTO companyDTO;
+    public GoodDTO goodDTO;
+    public InvoiceDTO invoiceDTO;
+    public PaymentMeanDTO paymentMeanDTO;
+    public UnitOfMeasureDTO unitOfMeasureDTO;
+    public InvoiceLineDTO invoiceLineDTO;
+    public Set<PaymentMeanDTO> pmDTO = new HashSet<>();
+    public Set<InvoiceDTO> invoicesDTO = new HashSet<>();
+    public Set<InvoiceLineDTO> invLinesDTO = new HashSet<>();
+
     public void completeInit(){
         this.initCompanyIssuer();
 
@@ -43,11 +54,34 @@ public abstract class TestInizializer {
         this.initInvoiceLine();
 
         this.initInvoice();
+
+        this.initCompanyDTO();
+
+        this.initUnitOfMeasureDTO();
+
+        this.initPaymentMeanDTO();
+
+        this.initGoodDTO();
+
+        this.initInvoiceLineDTO();
+
+        this.initInvoiceDTO();
     }
 
     public void initCompanyIssuer(){
         companyIssuer = Company.builder()
                 .id(1L)
+                .address("Company Issuer Address")
+                .country("Russia")
+                .name("Company Issuer")
+                .email("compissuer@mail.ru")
+                .tin("12345678")
+                .phone("1234567")
+                .build();
+    }
+
+    public void initCompanyDTO(){
+        companyDTO = CompanyDTO.builder()
                 .address("Company Issuer Address")
                 .country("Russia")
                 .name("Company Issuer")
@@ -70,20 +104,34 @@ public abstract class TestInizializer {
     }
 
     public void initUnitOfMeasure(){
-        UnitOfMeasure unitOfMeasure = UnitOfMeasure.builder()
+        unitOfMeasure = UnitOfMeasure.builder()
+                .name("KG")
+                .description("Kilos").build();
+    }
+
+    public void initUnitOfMeasureDTO(){
+        unitOfMeasureDTO = UnitOfMeasureDTO.builder()
                 .name("KG")
                 .description("Kilos").build();
     }
 
     public void initPaymentMean(){
-        PaymentMean paymentMean1 = PaymentMean.builder()
+        paymentMean1 = PaymentMean.builder()
                 .description("Avans 10 %").build();
 
-        PaymentMean paymentMean2 = PaymentMean.builder()
+        paymentMean2 = PaymentMean.builder()
                 .description("not later than 30 days").build();
 
         pm.add(paymentMean1);
         pm.add(paymentMean2);
+    }
+
+    public void initPaymentMeanDTO(){
+        paymentMeanDTO = PaymentMeanDTO.builder()
+                .description("Avans 10 %").build();
+
+        pmDTO.add(paymentMeanDTO);
+
     }
 
     public void initCurrency(){
@@ -94,6 +142,13 @@ public abstract class TestInizializer {
         good = Good.builder()
                 .name("Patotes")
                 .uom(unitOfMeasure)
+                .build();
+    }
+
+    public void initGoodDTO(){
+        goodDTO = GoodDTO.builder()
+                .name("Patotes")
+                .uom(unitOfMeasureDTO)
                 .build();
     }
 
@@ -110,6 +165,19 @@ public abstract class TestInizializer {
         invLines.add(invoiceLine);
     }
 
+    public void initInvoiceLineDTO(){
+        invoiceLineDTO = InvoiceLineDTO.builder()
+                .good(goodDTO)
+                .linenumber("0100")
+                .quantity(new BigDecimal(1.00))
+                .baseamount(new BigDecimal(100))
+                .curr(usd)
+                .build();
+
+        invLinesDTO.add(invoiceLineDTO);
+
+    }
+
     public void initInvoice(){
         invoice = Invoice.builder()
                 .date(this.invoiceDate)
@@ -122,6 +190,18 @@ public abstract class TestInizializer {
                 .build();
 
         invoices.add(invoice);
+    }
+
+    public void initInvoiceDTO(){
+        invoiceDTO = InvoiceDTO.builder()
+                .date(this.invoiceDate)
+                .companyissuer(companyDTO)
+                .companyreceiver(companyDTO)
+                .invoicelines(invLinesDTO)
+                .paymentmeans(pmDTO)
+                .number(invoiceNumber)
+                .build();
+
     }
 
 }

@@ -13,6 +13,7 @@ import java.util.Set;
 @Setter
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(name="invoice_lines")
 @Builder
 public class InvoiceLine {

@@ -8,8 +8,7 @@ import sdv.spring.apiinvoices.domain.Company;
 import sdv.spring.apiinvoices.repository.CompanyRepository;
 import sdv.spring.apiinvoices.services.CompanyService;
 
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -20,7 +19,7 @@ class CompanyJPAServiceIT {
 
     CompanyService companyService;
 
-    HashSet<Company> companies = new HashSet<>();
+    Set<Company> companies = new HashSet<>();
     Company company;
     Company company2;
 
