@@ -1,5 +1,6 @@
 package sdv.spring.apiinvoices.mapper;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 import sdv.spring.apiinvoices.domain.Invoice;

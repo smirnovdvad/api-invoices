@@ -34,4 +34,17 @@ public class Company {
 
     @NotEmpty
     private String tin;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj  instanceof Company == false)
+            return false;
+
+        Company companyToCompare = (Company)  obj;
+        if (this.getTin().equals(companyToCompare.getTin()))
+            return true;
+        else
+            return false;
+
+    }
 }

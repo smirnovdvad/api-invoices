@@ -1,9 +1,11 @@
 package sdv.spring.apiinvoices.services.springdatajpa;
 
+import lombok.extern.slf4j.Slf4j;
 import sdv.spring.apiinvoices.domain.Company;
 import sdv.spring.apiinvoices.domain.Invoice;
 import org.springframework.stereotype.Service;
 import sdv.spring.apiinvoices.domain.PaymentMean;
+import sdv.spring.apiinvoices.exception.InvoiceDuplicateNumber;
 import sdv.spring.apiinvoices.exception.InvoiceNotFoundException;
 import sdv.spring.apiinvoices.mapper.InvoiceMapper;
 import sdv.spring.apiinvoices.model.InvoiceDTO;
@@ -20,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class InvoiceJPAService implements InvoiceService {
 
     private InvoiceMapper invoiceMapper = InvoiceMapper.INSTANCE;
@@ -61,24 +64,24 @@ public class InvoiceJPAService implements InvoiceService {
     public Invoice save(Invoice object) {
         Company companytmp;
         companytmp = companyService.findByTin(object.getCompanyissuer().getTin());
-        if (companytmp == null)
-            companyService.save(object.getCompanyissuer());
-        else
+        if (companytmp != null)
             object.getCompanyissuer().setId(companytmp.getId());
+        else
+            companyService.save(object.getCompanyissuer());
 
         companytmp = companyService.findByTin(object.getCompanyreceiver().getTin());
-        if ( companytmp == null)
-            companyService.save(object.getCompanyreceiver());
-        else
+        if (companytmp != null)
             object.getCompanyreceiver().setId(companytmp.getId());
+        else
+            companyService.save(object.getCompanyreceiver());
 
         object.getPaymentmeans().forEach(paymentMean -> {
             PaymentMean paymentMeanTmp;
             paymentMeanTmp = paymentMeanService.findByDescription(paymentMean.getDescription());
-            if ( paymentMeanTmp== null)
-                paymentMeanService.save(paymentMean);
-            else
+            if ( paymentMeanTmp != null)
                 paymentMean.setId(paymentMeanTmp.getId());
+            else
+                paymentMeanService.save(paymentMean);
         });
 
         object.getInvoicelines().forEach(invoiceLine -> {
@@ -100,6 +103,14 @@ public class InvoiceJPAService implements InvoiceService {
 
     @Override
     public InvoiceDTO postInvoiceDTO(InvoiceDTO invoiceDTO) {
+        Optional<Invoice> optInvoice = invoiceRepository.findByNumber(
+                invoiceDTO.getNumber()
+        );
+        if (optInvoice.isPresent() &&
+                invoiceMapper.invoiceDtoToInvoice(invoiceDTO).getCompanyissuer()
+                        .equals(optInvoice.get().getCompanyissuer()))
+            throw new InvoiceDuplicateNumber("This Invoice already exists. Before posting new document you need " +
+                    "to reverse old one");
         return invoiceMapper.invoiceToInvoiceDTO(save(
                 invoiceMapper.invoiceDtoToInvoice(invoiceDTO)
         ));
@@ -123,7 +134,7 @@ public class InvoiceJPAService implements InvoiceService {
         if (optInvoice.isPresent())
             invoice.setId(optInvoice.get().getId());
 
-        return invoiceMapper.invoiceToInvoiceDTO(invoiceRepository.save(invoice));
+        return invoiceMapper.invoiceToInvoiceDTO(save(invoice));
     }
 
     @Override

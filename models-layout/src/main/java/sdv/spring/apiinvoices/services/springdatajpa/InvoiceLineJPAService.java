@@ -1,6 +1,7 @@
 package sdv.spring.apiinvoices.services.springdatajpa;
 
 import org.springframework.stereotype.Service;
+import sdv.spring.apiinvoices.domain.Good;
 import sdv.spring.apiinvoices.domain.InvoiceLine;
 import sdv.spring.apiinvoices.repository.InvoiceLineRepository;
 import sdv.spring.apiinvoices.services.GoodService;
@@ -40,7 +41,10 @@ public class InvoiceLineJPAService implements InvoiceLineService {
 
     @Override
     public InvoiceLine save(InvoiceLine object) {
-        if (goodService.findByName(object.getGood().getName()) == null)
+        Good goodTmp = goodService.findByName(object.getGood().getName());
+        if (goodTmp != null)
+            object.getGood().setId(goodTmp.getId());
+        else
             goodService.save(object.getGood());
         return invoicelinerepository.save(object);
     }

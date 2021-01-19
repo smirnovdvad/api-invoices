@@ -42,10 +42,10 @@ public class GoodJPAService implements GoodService {
     @Override
     public Good save(Good object) {
         UnitOfMeasure uomTmp = unitOfMeasureService.findByName(object.getUom().getName());
-        if ( uomTmp == null)
-            unitOfMeasureService.save(object.getUom());
-        else
+        if ( uomTmp != null)
             object.getUom().setId(uomTmp.getId());
+        else
+            unitOfMeasureService.save(object.getUom());
         return goodrepository.save(object);
     }
 
