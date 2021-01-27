@@ -2,11 +2,13 @@ package sdv.spring.apiinvoices.services.springdatajpa;
 
 import org.springframework.stereotype.Service;
 import sdv.spring.apiinvoices.domain.Good;
+import sdv.spring.apiinvoices.domain.Invoice;
 import sdv.spring.apiinvoices.domain.InvoiceLine;
 import sdv.spring.apiinvoices.repository.InvoiceLineRepository;
 import sdv.spring.apiinvoices.services.GoodService;
 import sdv.spring.apiinvoices.services.InvoiceLineService;
 
+import javax.swing.text.html.Option;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -57,5 +59,15 @@ public class InvoiceLineJPAService implements InvoiceLineService {
     @Override
     public void deleteById(Long aLong) {
         invoicelinerepository.deleteById(aLong);
+    }
+
+    @Override
+    public InvoiceLine findByLineNumberAndInvoice(String lineNumber, Invoice invoice){
+        Optional<InvoiceLine> optionalInvoiceLine =
+        invoicelinerepository.findInvoiceLineByLinenumberAndInvoice(lineNumber,invoice);
+        if (optionalInvoiceLine.isPresent())
+            return optionalInvoiceLine.get();
+        else
+            return null;
     }
 }

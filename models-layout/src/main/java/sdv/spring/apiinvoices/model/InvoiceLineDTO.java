@@ -1,5 +1,6 @@
 package sdv.spring.apiinvoices.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Currency;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @Builder
@@ -25,5 +28,7 @@ public class InvoiceLineDTO {
     private BigDecimal baseamount;
     @JsonProperty("currency_iso_code")
     private Currency curr;
+    @JsonIgnore
+    transient private BigDecimal amountInRubles;
 
 }

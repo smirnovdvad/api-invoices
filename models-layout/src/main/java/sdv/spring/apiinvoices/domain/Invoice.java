@@ -4,10 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.Set;
 
 @Data
@@ -16,11 +20,16 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@DynamicUpdate
 public class Invoice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name="is_reversed")
+    private Boolean isReversed;
+
     @NotEmpty
     private String number;
     @Column(name = "issue_date")
@@ -38,7 +47,27 @@ public class Invoice {
     private Set<PaymentMean> paymentmeans;
 
     @OneToMany(mappedBy = "invoice" , cascade =  CascadeType.ALL)
-    //@JoinColumn(name="id", nullable = false, insertable = false, updatable = false)
     private Set<InvoiceLine> invoicelines;
+
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="creation_date" )
+    private Date createDate;
+
+    @UpdateTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="update_date")
+    private Date updateDate;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="reversed_date")
+    private Date reversalDate;
+
+    @PreUpdate
+    protected void onUpdate(){
+        if ( isReversed != null && isReversed.booleanValue()==true
+                && reversalDate.toString()=="")
+            reversalDate = new Date();
+    }
 
 }

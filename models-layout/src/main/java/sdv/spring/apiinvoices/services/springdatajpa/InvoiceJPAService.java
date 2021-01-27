@@ -4,8 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import sdv.spring.apiinvoices.domain.Company;
 import sdv.spring.apiinvoices.domain.Invoice;
 import org.springframework.stereotype.Service;
+import sdv.spring.apiinvoices.domain.InvoiceLine;
 import sdv.spring.apiinvoices.domain.PaymentMean;
 import sdv.spring.apiinvoices.exception.InvoiceDuplicateNumber;
+import sdv.spring.apiinvoices.exception.InvoiceLineNotFoundException;
 import sdv.spring.apiinvoices.exception.InvoiceNotFoundException;
 import sdv.spring.apiinvoices.mapper.InvoiceMapper;
 import sdv.spring.apiinvoices.model.InvoiceDTO;
@@ -15,6 +17,7 @@ import sdv.spring.apiinvoices.services.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.swing.*;
 import javax.swing.text.html.Option;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -85,8 +88,21 @@ public class InvoiceJPAService implements InvoiceService {
         });
 
         object.getInvoicelines().forEach(invoiceLine -> {
+            InvoiceLine savedInvoiceLine = null;
+
             goodService.save(invoiceLine.getGood());
             invoiceLine.setInvoice(object);
+            if (object.getId() != null)
+            {
+                log.info(object.getId().toString());
+                savedInvoiceLine =
+                        invoiceLineService.findByLineNumberAndInvoice(invoiceLine.getLinenumber(),object);
+                if (savedInvoiceLine == null)
+                    throw new InvoiceLineNotFoundException("Invoice Line with number "+ invoiceLine.getLinenumber() +
+                            " can not be updated due to not existence");
+            }
+            if (savedInvoiceLine!=null)
+                invoiceLine.setId(savedInvoiceLine.getId());
         });
         return invoiceRepository.save(object);
     }
@@ -109,8 +125,13 @@ public class InvoiceJPAService implements InvoiceService {
         if (optInvoice.isPresent() &&
                 invoiceMapper.invoiceDtoToInvoice(invoiceDTO).getCompanyissuer()
                         .equals(optInvoice.get().getCompanyissuer()))
+        {
+            log.error("Invoice already exist + " + invoiceDTO.toString());
             throw new InvoiceDuplicateNumber("This Invoice already exists. Before posting new document you need " +
                     "to reverse old one");
+
+        }
+
         return invoiceMapper.invoiceToInvoiceDTO(save(
                 invoiceMapper.invoiceDtoToInvoice(invoiceDTO)
         ));
@@ -132,7 +153,10 @@ public class InvoiceJPAService implements InvoiceService {
         Invoice invoice = invoiceMapper.invoiceDtoToInvoice(invoiceDTO);
         Optional<Invoice> optInvoice = invoiceRepository.findByNumber(invoice.getNumber());
         if (optInvoice.isPresent())
+        {
             invoice.setId(optInvoice.get().getId());
+            invoice.setCreateDate(optInvoice.get().getCreateDate());
+        }
 
         return invoiceMapper.invoiceToInvoiceDTO(save(invoice));
     }
@@ -142,8 +166,10 @@ public class InvoiceJPAService implements InvoiceService {
         Optional<Invoice> optInvoice = invoiceRepository.findByNumber(aInvNumber);
         if (optInvoice.isPresent())
             return invoiceMapper.invoiceToInvoiceDTO(optInvoice.get());
-        else
+        else{
+            log.error("Invoice with number " + aInvNumber + " does not exist");
             throw new InvoiceNotFoundException("Invoice does not exist");
+        }
     }
 
     @Override

@@ -45,5 +45,8 @@ public class InvoiceLine {
     @Column(name="currency")
     private Currency curr;
 
+    @Column(name = "amount_in_rub")
+    private BigDecimal amountInRubles;
+
 
 }
