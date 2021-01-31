@@ -1,34 +1,29 @@
 package sdv.spring.apiinvoices.services.springdatajpa;
 
 import lombok.extern.slf4j.Slf4j;
-import sdv.spring.apiinvoices.domain.Company;
-import sdv.spring.apiinvoices.domain.Invoice;
+import sdv.spring.apiinvoices.domain.*;
 import org.springframework.stereotype.Service;
-import sdv.spring.apiinvoices.domain.InvoiceLine;
-import sdv.spring.apiinvoices.domain.PaymentMean;
 import sdv.spring.apiinvoices.exception.InvoiceDuplicateNumber;
 import sdv.spring.apiinvoices.exception.InvoiceLineNotFoundException;
 import sdv.spring.apiinvoices.exception.InvoiceNotFoundException;
+import sdv.spring.apiinvoices.mapper.CompanyMapper;
 import sdv.spring.apiinvoices.mapper.InvoiceMapper;
+import sdv.spring.apiinvoices.model.CompanyDTO;
 import sdv.spring.apiinvoices.model.InvoiceDTO;
 import sdv.spring.apiinvoices.repository.InvoiceRepository;
 import sdv.spring.apiinvoices.services.*;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.swing.*;
-import javax.swing.text.html.Option;
-import java.math.BigDecimal;
+import javax.transaction.Transactional;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class InvoiceJPAService implements InvoiceService {
 
     private InvoiceMapper invoiceMapper = InvoiceMapper.INSTANCE;
+    private CompanyMapper companyMapper = CompanyMapper.INSTANCE;
 
     public InvoiceJPAService(InvoiceRepository invoiceRepository, CompanyService companyService, InvoiceLineService invoiceLineService,
                              PaymentMeanService paymentMeanService, GoodService goodService) {
@@ -64,6 +59,7 @@ public class InvoiceJPAService implements InvoiceService {
     }
 
     @Override
+    @Transactional
     public Invoice save(Invoice object) {
         Company companytmp;
         companytmp = companyService.findByTin(object.getCompanyissuer().getTin());
@@ -82,15 +78,23 @@ public class InvoiceJPAService implements InvoiceService {
             PaymentMean paymentMeanTmp;
             paymentMeanTmp = paymentMeanService.findByDescription(paymentMean.getDescription());
             if ( paymentMeanTmp != null)
+            {
                 paymentMean.setId(paymentMeanTmp.getId());
+                paymentMean.getInvoices().add(object);
+            }
             else
                 paymentMeanService.save(paymentMean);
         });
 
         object.getInvoicelines().forEach(invoiceLine -> {
             InvoiceLine savedInvoiceLine = null;
+            invoiceLine.getGood().getInvoiceLines().add(invoiceLine);
+            Good good = goodService.findByName(invoiceLine.getGood().getName());
 
-            goodService.save(invoiceLine.getGood());
+            if (good != null)
+                invoiceLine.getGood().setId(good.getId());
+            else
+                goodService.save(invoiceLine.getGood());
             invoiceLine.setInvoice(object);
             if (object.getId() != null)
             {
@@ -119,12 +123,14 @@ public class InvoiceJPAService implements InvoiceService {
 
     @Override
     public InvoiceDTO postInvoiceDTO(InvoiceDTO invoiceDTO) {
-        Optional<Invoice> optInvoice = invoiceRepository.findByNumber(
-                invoiceDTO.getNumber()
-        );
+        Optional<Invoice> optInvoice = invoiceRepository.findByNumberAndIsReversed(
+                invoiceDTO.getNumber(),
+                Boolean.valueOf("FALSE") );
+
         if (optInvoice.isPresent() &&
                 invoiceMapper.invoiceDtoToInvoice(invoiceDTO).getCompanyissuer()
-                        .equals(optInvoice.get().getCompanyissuer()))
+                        .equals(optInvoice.get().getCompanyissuer()) &&
+            optInvoice.get().getIsReversed() == false)
         {
             log.error("Invoice already exist + " + invoiceDTO.toString());
             throw new InvoiceDuplicateNumber("This Invoice already exists. Before posting new document you need " +
@@ -151,11 +157,14 @@ public class InvoiceJPAService implements InvoiceService {
     @Override
     public InvoiceDTO putInvoiceDTO(InvoiceDTO invoiceDTO) {
         Invoice invoice = invoiceMapper.invoiceDtoToInvoice(invoiceDTO);
-        Optional<Invoice> optInvoice = invoiceRepository.findByNumber(invoice.getNumber());
+        Optional<Invoice> optInvoice = invoiceRepository.findByNumberAndIsReversed(invoice.getNumber(),
+                Boolean.valueOf("FALSE"));
         if (optInvoice.isPresent())
         {
             invoice.setId(optInvoice.get().getId());
-            invoice.setCreateDate(optInvoice.get().getCreateDate());
+//            if (invoice.getIsReversed())
+//                throw new UpdateIsNotPossibleException("Update is not possible. Document is reversed, but you can create " +
+//                        "new document");
         }
 
         return invoiceMapper.invoiceToInvoiceDTO(save(invoice));
@@ -179,5 +188,25 @@ public class InvoiceJPAService implements InvoiceService {
             return optInvoice.get();
         else
             throw new InvoiceNotFoundException("Invoice does not exist");
+    }
+
+    @Override
+    public Invoice findByNumberAndCompanyIssuerAndIsReversed(String aInvNumber, CompanyDTO companyIssuer, Boolean isReversed) {
+        Optional<Invoice> optInvoice = invoiceRepository.findByNumberAndCompanyIssuerAndIsReversed(
+                aInvNumber, companyMapper.companyDtoToCompany(companyIssuer), isReversed
+        );
+        if (optInvoice.isPresent())
+            return optInvoice.get();
+        else
+            return null;
+    }
+
+    @Override
+    public Invoice findByNumberAndIsReversed(String aInvNumber, Boolean isReversed) {
+        Optional<Invoice> optionalInvoice = invoiceRepository.findByNumberAndIsReversed(aInvNumber,Boolean.valueOf("FALSE"));
+        if (optionalInvoice.isPresent())
+            return optionalInvoice.get();
+        else
+            return null;
     }
 }

@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.Set;
 
 @Data
-@Entity
+@Entity(name="invoices")
 @Table(name= "invoices")
 @Builder
 @AllArgsConstructor
@@ -28,7 +28,8 @@ public class Invoice {
     private Long id;
 
     @Column(name="is_reversed")
-    private Boolean isReversed;
+    @Builder.Default
+    private Boolean isReversed = false;
 
     @NotEmpty
     private String number;
@@ -51,7 +52,7 @@ public class Invoice {
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="creation_date" )
+    @Column(name="creation_date" , updatable = false)
     private Date createDate;
 
     @UpdateTimestamp
@@ -66,7 +67,7 @@ public class Invoice {
     @PreUpdate
     protected void onUpdate(){
         if ( isReversed != null && isReversed.booleanValue()==true
-                && reversalDate.toString()=="")
+                && ( reversalDate == null || reversalDate.toString()==""))
             reversalDate = new Date();
     }
 

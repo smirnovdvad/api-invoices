@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import sdv.spring.apiinvoices.domain.Invoice;
 import sdv.spring.apiinvoices.initializer.TestInizializer;
+import sdv.spring.apiinvoices.repository.InvoiceLineRepository;
 import sdv.spring.apiinvoices.repository.InvoiceRepository;
 import sdv.spring.apiinvoices.services.*;
 
@@ -24,6 +25,9 @@ class InvoiceJPAServiceIT extends TestInizializer {
 
     @Mock
     InvoiceLineService invoiceLineService;
+
+    @Mock
+    InvoiceLineRepository invoiceLineRepository;
 
     @Mock
     PaymentMeanService paymentMeanService;
@@ -61,11 +65,13 @@ class InvoiceJPAServiceIT extends TestInizializer {
     @Test
     void save() {
         when(invoiceRepository.save(any())).thenReturn(invoice);
+        when(invoiceLineService.findByLineNumberAndInvoice(any(),any())).
+                thenReturn(invoice.getInvoicelines().stream().findAny().get());
         assertEquals(55L,invoiceService.save(invoice).getId());
         verify(companyService,times(2)).findByTin(anyString());
         verify(companyService,times(2)).save(any());
         verify(paymentMeanService,times(2)).findByDescription(anyString());
-        verify(paymentMeanService,times(2)).save(any());
+        //verify(paymentMeanService,times(2)).save(any());
         verify(goodService,times(1)).save(any());
     }
 

@@ -9,7 +9,8 @@ import org.springframework.web.context.request.WebRequest;
 
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler {
-    @ExceptionHandler({InvoiceNotFoundException.class, InvoiceDuplicateNumber.class, InvoiceLineNotFoundException.class})
+    @ExceptionHandler({InvoiceNotFoundException.class, InvoiceDuplicateNumber.class,
+            InvoiceLineNotFoundException.class})
     public ResponseEntity<Object> handleNotFoundException(Exception exception, WebRequest request){
 
         return new ResponseEntity<Object>(exception.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND);
@@ -19,5 +20,13 @@ public class RestResponseEntityExceptionHandler {
     @ExceptionHandler({WrongInvoiceDate.class})
     public ResponseEntity<Object> handleWrongInvoiceDate(Exception exception, WebRequest request){
         return new ResponseEntity<Object>(exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({InvoiceIsAlreadyReversedException.class,
+                       UpdateIsNotPossibleException.class})
+    public ResponseEntity<Object> handleMethodNotAllowed(Exception exception, WebRequest request){
+
+        return new ResponseEntity<Object>(exception.getMessage(), new HttpHeaders(), HttpStatus.METHOD_NOT_ALLOWED);
+
     }
 }

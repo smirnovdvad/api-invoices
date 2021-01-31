@@ -4,21 +4,25 @@ import sdv.spring.apiinvoices.domain.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import sdv.spring.apiinvoices.services.InvoiceService;
+import sdv.spring.apiinvoices.services.PaymentMeanService;
 
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Currency;
 import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class DataLoader implements CommandLineRunner {
 
-    public DataLoader(InvoiceService invoiceService) {
+    public DataLoader(InvoiceService invoiceService, PaymentMeanService paymentMeanService) {
         this.invoiceService = invoiceService;
+        this.paymentMeanService = paymentMeanService;
     }
 
     private final InvoiceService invoiceService;
+    private final PaymentMeanService paymentMeanService;
     @Override
     public void run(String... args) throws Exception {
         Company compIssuer = Company.builder()
@@ -46,11 +50,18 @@ public class DataLoader implements CommandLineRunner {
                 .uom(uomKG)
                 .build();
 
+        Set<Good> goods = new HashSet<>();
+        goods.add(patotes);
+        uomKG.setGoods(goods);
+
         PaymentMean pm1 = PaymentMean.builder()
                 .description("Avans 10 %").build();
 
         PaymentMean pm2 = PaymentMean.builder()
                 .description("not later than 30 days").build();
+
+        //paymentMeanService.save(pm1);
+        //paymentMeanService.save(pm2);
 
         Currency rub = Currency.getInstance("USD");
 
@@ -64,9 +75,11 @@ public class DataLoader implements CommandLineRunner {
 
         HashSet<InvoiceLine> invLines = new HashSet<>();
         invLines.add(invL1);
+        patotes.setInvoiceLines(invLines);
 
         HashSet<PaymentMean> pm = new HashSet<>();
         pm.add(pm1);
+        pm.add(pm2);
 
         Invoice inv = Invoice.builder()
                 .date(LocalDate.now())
@@ -76,6 +89,11 @@ public class DataLoader implements CommandLineRunner {
                 .paymentmeans(pm)
                 .number("Inv1")
                 .build();
+
+        Set<Invoice> invoices = new HashSet<>();
+        invoices.add(inv);
+        pm1.setInvoices(invoices);
+        pm2.setInvoices(invoices);
 
         invoiceService.save(inv);
     }

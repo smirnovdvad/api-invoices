@@ -163,6 +163,8 @@ public abstract class TestInizializer {
                 .build();
 
         invLines.add(invoiceLine);
+        if (good!=null)
+            good.setInvoiceLines(invLines);
     }
 
     public void initInvoiceLineDTO(){

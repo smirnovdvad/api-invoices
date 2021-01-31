@@ -35,5 +35,7 @@ public class InvoiceDTO {
     @JsonProperty("items")
     private Set<InvoiceLineDTO> invoicelines;
 
+    @JsonIgnore
+    private Boolean isReversed;
 
 }

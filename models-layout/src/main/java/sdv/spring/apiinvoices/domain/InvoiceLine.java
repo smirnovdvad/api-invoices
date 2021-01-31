@@ -30,7 +30,7 @@ public class InvoiceLine {
     @Column(name = "line_number")
     private String linenumber;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="good_id")
     private Good good;
 

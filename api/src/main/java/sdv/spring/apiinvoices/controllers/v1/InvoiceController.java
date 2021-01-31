@@ -5,15 +5,17 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sdv.spring.apiinvoices.domain.CurrencyCBRFNode;
+import sdv.spring.apiinvoices.domain.Invoice;
+import sdv.spring.apiinvoices.exception.InvoiceIsAlreadyReversedException;
+import sdv.spring.apiinvoices.exception.InvoiceNotFoundException;
+import sdv.spring.apiinvoices.mapper.InvoiceMapper;
 import sdv.spring.apiinvoices.model.InvoiceDTO;
+import sdv.spring.apiinvoices.model.ReversionDTO;
 import sdv.spring.apiinvoices.service.CBRFService;
 import sdv.spring.apiinvoices.services.InvoiceService;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 
@@ -22,6 +24,7 @@ import java.util.List;
 public class InvoiceController {
 
     private final InvoiceService invoiceService;
+    private final InvoiceMapper invoiceMapper = InvoiceMapper.INSTANCE;
 
     private final CBRFService cbrfService;
 
@@ -82,7 +85,7 @@ public class InvoiceController {
     }
 
     private void CalculateAmountInRuble(InvoiceDTO invoiceDTO){
-        invoiceDTO.getInvoicelines().stream().forEach(item->{
+        invoiceDTO.getInvoicelines().forEach(item->{
             if (!item.getCurr().getCurrencyCode().equals("RUB")){
                 List<CurrencyCBRFNode> currCBRF=  cbrfService.getCurrencyRateOnTheDate(
                         item.getCurr(),
@@ -94,5 +97,35 @@ public class InvoiceController {
                 item.setAmountInRubles( amountInRubles );
             }
         });
+    }
+
+    @PutMapping( path = "/reverse",
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE,
+            headers="content-type=application/json")
+    public ResponseEntity<Object> reverseInvoiceJSON(@RequestBody ReversionDTO reversionDTO){
+        return makeInvoiceReversal(reversionDTO);
+    }
+
+    @PutMapping( path = "/reverse",
+            consumes =  MediaType.APPLICATION_XML_VALUE,produces = MediaType.APPLICATION_XML_VALUE,
+            headers="content-type=application/xml")
+    public ResponseEntity<Object> reverseInvoiceXML(@RequestBody ReversionDTO reversionDTO){
+        return makeInvoiceReversal(reversionDTO);
+    }
+
+    private ResponseEntity<Object> makeInvoiceReversal(ReversionDTO reversionDTO){
+        Invoice invoiceForReversion = invoiceService.findByNumberAndCompanyIssuerAndIsReversed(
+                reversionDTO.getInvoiceNumber(), reversionDTO.getCompanyissuer(),
+        Boolean.valueOf("FALSE"));
+        if (invoiceForReversion == null){
+            throw new InvoiceNotFoundException("Invoice does not exist");
+        }
+        if (invoiceForReversion.getIsReversed()){
+            throw new InvoiceIsAlreadyReversedException("Provided Invoice is already reversed");
+        }
+        invoiceForReversion.setIsReversed(true);
+        return new ResponseEntity<>(
+                invoiceMapper.invoiceToInvoiceDTO(invoiceService.save(invoiceForReversion)),
+                HttpStatus.OK);
     }
 }

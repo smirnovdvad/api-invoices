@@ -1,19 +1,19 @@
 package sdv.spring.apiinvoices.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name="uom")
 @Builder
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter
+@Getter
 public class UnitOfMeasure {
 
     @Id
@@ -26,5 +26,8 @@ public class UnitOfMeasure {
 
     @NotEmpty
     private String description;
+
+    @OneToMany(mappedBy = "uom")
+    Set<Good> goods = new HashSet<>();
 
 }
