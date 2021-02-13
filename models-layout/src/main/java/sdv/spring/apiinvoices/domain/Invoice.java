@@ -29,7 +29,7 @@ public class Invoice {
 
     @Column(name="is_reversed")
     @Builder.Default
-    private Boolean isReversed = false;
+    private Boolean isReversed = Boolean.valueOf("FALSE");
 
     @NotEmpty
     private String number;

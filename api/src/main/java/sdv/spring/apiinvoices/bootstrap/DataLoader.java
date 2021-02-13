@@ -1,5 +1,6 @@
 package sdv.spring.apiinvoices.bootstrap;
 
+import org.springframework.context.annotation.Profile;
 import sdv.spring.apiinvoices.domain.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Component
+@Profile("test")
 public class DataLoader implements CommandLineRunner {
 
     public DataLoader(InvoiceService invoiceService, PaymentMeanService paymentMeanService) {
