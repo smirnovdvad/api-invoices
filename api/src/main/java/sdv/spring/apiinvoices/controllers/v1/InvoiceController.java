@@ -3,6 +3,7 @@ package sdv.spring.apiinvoices.controllers.v1;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import sdv.spring.apiinvoices.domain.CurrencyCBRFNode;
 import sdv.spring.apiinvoices.domain.Invoice;
@@ -33,26 +34,31 @@ public class InvoiceController {
         this.cbrfService = cbrfService;
     }
 
+    @PreAuthorize("hasAnyAuthority('invoice.read') or hasRole('ADMIN')")
     @GetMapping(produces = MediaType.APPLICATION_XML_VALUE , headers = "content-type=application/xml")
     public ResponseEntity<Object> getAllInvoicesXML(){
         return new ResponseEntity<>(invoiceService.getAllInvoicesDTO(), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('invoice.read') or hasRole('ADMIN')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE , headers = "content-type=application/json")
     public ResponseEntity<Object> getAllInvoicesJson(){
         return new ResponseEntity<>(invoiceService.getAllInvoicesDTO(), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('invoice.read') or hasRole('ADMIN')")
     @GetMapping(path = {"/{invNumber}"}, produces = MediaType.APPLICATION_XML_VALUE, headers="content-type=application/xml")
     public ResponseEntity<Object> getInvoiceByNumberXML(@PathVariable String invNumber){
         return new ResponseEntity<>(invoiceService.getInvoiceDTOByNumber(invNumber), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('invoice.read') or hasRole('ADMIN')")
     @GetMapping(path = {"/{invNumber}"}, produces = MediaType.APPLICATION_JSON_VALUE, headers="content-type=application/json")
     public ResponseEntity<Object> getInvoiceByNumberJson(@PathVariable String invNumber){
         return new ResponseEntity<>(invoiceService.getInvoiceDTOByNumber(invNumber), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('invoice.create') or hasRole('ADMIN')")
     @PostMapping(consumes =  MediaType.APPLICATION_XML_VALUE,produces = MediaType.APPLICATION_XML_VALUE,
             headers="content-type=application/xml")
     public ResponseEntity<Object> postInvoiceXML(@RequestBody InvoiceDTO invoiceDTO){
@@ -61,6 +67,7 @@ public class InvoiceController {
         return new ResponseEntity<>(invoiceService.postInvoiceDTO(invoiceDTO),HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAnyAuthority('invoice.create') or hasRole('ADMIN')")
     @PostMapping(consumes =  MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE,
             headers="content-type=application/json")
     public ResponseEntity<Object> postInvoiceJson(@RequestBody InvoiceDTO invoiceDTO){
@@ -68,6 +75,7 @@ public class InvoiceController {
         return new ResponseEntity<>(invoiceService.postInvoiceDTO(invoiceDTO),HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAnyAuthority('invoice.create') or hasRole('ADMIN')")
     @PutMapping(
             consumes =  MediaType.APPLICATION_XML_VALUE,produces = MediaType.APPLICATION_XML_VALUE,
             headers="content-type=application/xml")
@@ -76,6 +84,7 @@ public class InvoiceController {
         return new ResponseEntity<>(invoiceService.putInvoiceDTO(invoiceDTO),HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAnyAuthority('invoice.create') or hasRole('ADMIN')")
     @PutMapping(
             consumes =  MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE,
             headers="content-type=application/json")
@@ -99,6 +108,7 @@ public class InvoiceController {
         });
     }
 
+    @PreAuthorize("hasAnyAuthority('invoice.reverse') or hasRole('ADMIN')")
     @PutMapping( path = "/reverse",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE,
             headers="content-type=application/json")
@@ -106,6 +116,7 @@ public class InvoiceController {
         return makeInvoiceReversal(reversionDTO);
     }
 
+    @PreAuthorize("hasAnyAuthority('invoice.reverse') or hasRole('ADMIN')")
     @PutMapping( path = "/reverse",
             consumes =  MediaType.APPLICATION_XML_VALUE,produces = MediaType.APPLICATION_XML_VALUE,
             headers="content-type=application/xml")

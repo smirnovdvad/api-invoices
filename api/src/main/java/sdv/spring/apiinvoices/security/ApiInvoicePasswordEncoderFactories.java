@@ -8,7 +8,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ApiInvoicePasswordEncoderFactories {
+
+    private static DelegatingPasswordEncoder passEncoder;
+
     public static PasswordEncoder createDelegatingPasswordEncoder() {
+
+        if (passEncoder != null)
+            return passEncoder;
+
         String encodingId = "bcrypt10";
         Map<String, PasswordEncoder> encoders = new HashMap<>();
         encoders.put(encodingId, new BCryptPasswordEncoder(10));
@@ -17,7 +24,9 @@ public class ApiInvoicePasswordEncoderFactories {
         encoders.put("noop", org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance());
         encoders.put("sha256", new org.springframework.security.crypto.password.StandardPasswordEncoder());
 
-        return new DelegatingPasswordEncoder(encodingId, encoders);
+        passEncoder = new DelegatingPasswordEncoder(encodingId, encoders);
+
+        return passEncoder;
     }
 
     //don't instantiate class

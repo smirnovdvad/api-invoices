@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sdv.spring.apiinvoices.domain.security.Authority;
 import sdv.spring.apiinvoices.domain.security.User;
@@ -26,6 +27,8 @@ public class JpaUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        //logger.info("### User " + username);
+        log.info("###### User "+ username);
         User user = userRepository.findByUsername(username).orElseThrow( () ->{
            return new UsernameNotFoundException("User name: " + username + " not found");
         });

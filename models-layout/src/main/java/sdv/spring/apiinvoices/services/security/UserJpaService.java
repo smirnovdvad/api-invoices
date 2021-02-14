@@ -1,5 +1,6 @@
 package sdv.spring.apiinvoices.services.security;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sdv.spring.apiinvoices.domain.security.User;
 import sdv.spring.apiinvoices.mapper.security.UserUpdateMapper;
@@ -18,9 +19,11 @@ public class UserJpaService implements UserService{
     private final UserRepository userRepository;
     private final UserViewMapper userViewMapper = UserViewMapper.INSTANCE;
     private final UserUpdateMapper userUpdateMapper = UserUpdateMapper.INSTANCE;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserJpaService(UserRepository userRepository) {
+    public UserJpaService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
@@ -40,6 +43,7 @@ public class UserJpaService implements UserService{
 
     @Override
     public UserViewDTO postUser(UserUpdateDTO userUpdateDTO) {
+        userUpdateDTO.setPassword(passwordEncoder.encode(userUpdateDTO.getPassword()));
         return userViewMapper.userToUserViewDTO(
                 userRepository.save(
                         userUpdateMapper.userUpdateDTOToUser(
