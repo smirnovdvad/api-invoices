@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet author="I324529 (generated)" id="1613400257749-1">
+        <dropForeignKeyConstraint baseTableName="goods" constraintName="fk8gvscy7cb644re9kikxi0qaks"/>
+    </changeSet>
+    <changeSet author="I324529 (generated)" id="1613400257749-2">
+        <dropForeignKeyConstraint baseTableName="invoice_lines" constraintName="fkekltynnqwpgn9e4wenjaggn0n"/>
+    </changeSet>
+    <changeSet author="I324529 (generated)" id="1613400257749-3">
+        <dropForeignKeyConstraint baseTableName="invoices_paymentmeans" constraintName="fkpwrnyaorlac3jfbufqehyqlfy"/>
+    </changeSet>
+    <changeSet author="I324529 (generated)" id="1613400257749-4">
+        <dropSequence sequenceName="companies_id_seq"/>
+    </changeSet>
+    <changeSet author="I324529 (generated)" id="1613400257749-5">
+        <dropSequence sequenceName="goods_id_seq"/>
+    </changeSet>
+    <changeSet author="I324529 (generated)" id="1613400257749-6">
+        <dropSequence sequenceName="hibernate_sequence"/>
+    </changeSet>
+    <changeSet author="I324529 (generated)" id="1613400257749-7">
+        <dropSequence sequenceName="invoice_lines_id_seq"/>
+    </changeSet>
+    <changeSet author="I324529 (generated)" id="1613400257749-8">
+        <dropSequence sequenceName="paymentmeans_id_seq"/>
+    </changeSet>
+    <changeSet author="I324529 (generated)" id="1613400257749-9">
+        <dropSequence sequenceName="uom_id_seq"/>
+    </changeSet>
+    <changeSet author="I324529 (generated)" id="1613400257749-10">
+        <dropTable tableName="companies"/>
+    </changeSet>
+    <changeSet author="I324529 (generated)" id="1613400257749-11">
+        <dropTable tableName="goods"/>
+    </changeSet>
+    <changeSet author="I324529 (generated)" id="1613400257749-12">
+        <dropTable tableName="invoice_lines"/>
+    </changeSet>
+    <changeSet author="I324529 (generated)" id="1613400257749-13">
+        <dropTable tableName="invoices"/>
+    </changeSet>
+    <changeSet author="I324529 (generated)" id="1613400257749-14">
+        <dropTable tableName="invoices_paymentmeans"/>
+    </changeSet>
+    <changeSet author="I324529 (generated)" id="1613400257749-15">
+        <dropTable tableName="paymentmeans"/>
+    </changeSet>
+    <changeSet author="I324529 (generated)" id="1613400257749-16">
+        <dropTable tableName="uom"/>
+    </changeSet>
+</databaseChangeLog>
