@@ -7,36 +7,15 @@ import sdv.spring.apiinvoices.repository.GoodRepository;
 import sdv.spring.apiinvoices.services.GoodService;
 import sdv.spring.apiinvoices.services.UnitOfMeasureService;
 
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
-public class GoodJPAService implements GoodService {
+public class GoodJPAService extends CrudServiceCommon<Good,Long,GoodRepository> implements GoodService {
 
-    private final GoodRepository goodrepository;
     private final UnitOfMeasureService unitOfMeasureService;
-
-    public GoodJPAService(GoodRepository goodrepository, UnitOfMeasureService unitOfMeasureService) {
-        this.goodrepository = goodrepository;
-        this.unitOfMeasureService = unitOfMeasureService;
-    }
-
-    @Override
-    public Set<Good> findAll() {
-        HashSet<Good> goods= new HashSet<>();
-        goodrepository.findAll().forEach(good -> goods.add(good));
-        return goods;
-    }
-
-    @Override
-    public Good findById(Long aLong) {
-        Optional<Good> good;
-        good = goodrepository.findById(aLong);
-        if (good.isPresent())
-            return good.get();
-        else
-            return null;
+    GoodJPAService(GoodRepository goodRepository,UnitOfMeasureService aUnitOfMeasureService){
+        super(goodRepository);
+        unitOfMeasureService = aUnitOfMeasureService;
     }
 
     @Override
@@ -46,23 +25,13 @@ public class GoodJPAService implements GoodService {
             object.getUom().setId(uomTmp.getId());
         else
             unitOfMeasureService.save(object.getUom());
-        return goodrepository.save(object);
-    }
-
-    @Override
-    public void delete(Good object) {
-        goodrepository.delete(object);
-    }
-
-    @Override
-    public void deleteById(Long aLong) {
-        goodrepository.deleteById(aLong);
+        return this.getRepository().save(object);
     }
 
     @Override
     public Good findByName(String aName) {
         Optional<Good> good =
-                goodrepository.findByName(aName);
+                this.getRepository().findByName(aName);
         if (good.isPresent())
             return good.get();
         else

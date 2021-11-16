@@ -20,43 +20,24 @@ import java.util.Set;
 
 @Service
 @Slf4j
-public class InvoiceJPAService implements InvoiceService {
+public class InvoiceJPAService extends  CrudServiceCommon<Invoice,Long,InvoiceRepository>
+                               implements  InvoiceService{
 
     private InvoiceMapper invoiceMapper = InvoiceMapper.INSTANCE;
     private CompanyMapper companyMapper = CompanyMapper.INSTANCE;
 
-    public InvoiceJPAService(InvoiceRepository invoiceRepository, CompanyService companyService, InvoiceLineService invoiceLineService,
-                             PaymentMeanService paymentMeanService, GoodService goodService) {
-        this.invoiceRepository = invoiceRepository;
-        this.companyService = companyService;
-        this.invoiceLineService = invoiceLineService;
-        this.paymentMeanService = paymentMeanService;
-        this.goodService = goodService;
+    public InvoiceJPAService(InvoiceRepository invoiceRepository, CompanyService aCompanyService, InvoiceLineService aInvoiceLineService,
+                             PaymentMeanService aPaymentMeanService, GoodService aGoodService) {
+        super(invoiceRepository);
+        this.companyService = aCompanyService;
+        this.invoiceLineService = aInvoiceLineService;
+        this.paymentMeanService = aPaymentMeanService;
+        this.goodService = aGoodService;
     }
-
-    private final InvoiceRepository invoiceRepository;
     private final CompanyService companyService;
     private final InvoiceLineService invoiceLineService;
     private final PaymentMeanService paymentMeanService;
     private final GoodService goodService;
-
-    @Override
-    public Set<Invoice> findAll() {
-        HashSet<Invoice> invoices = new HashSet<>();
-        invoiceRepository.findAll().forEach(invoice -> invoices.add(invoice));
-        return invoices;
-    }
-
-    @Override
-    public Invoice findById(Long aLong) {
-        Optional<Invoice> invoice;
-        invoice = invoiceRepository.findById(aLong);
-        if (invoice.isPresent())
-            return invoice.get();
-        else
-            return null;
-
-    }
 
     @Override
     @Transactional
@@ -108,22 +89,12 @@ public class InvoiceJPAService implements InvoiceService {
             if (savedInvoiceLine!=null)
                 invoiceLine.setId(savedInvoiceLine.getId());
         });
-        return invoiceRepository.save(object);
-    }
-
-    @Override
-    public void delete(Invoice object) {
-        invoiceRepository.delete(object);
-    }
-
-    @Override
-    public void deleteById(Long aLong) {
-        invoiceRepository.deleteById(aLong);
+        return this.getRepository().save(object);
     }
 
     @Override
     public InvoiceDTO postInvoiceDTO(InvoiceDTO invoiceDTO) {
-        Optional<Invoice> optInvoice = invoiceRepository.findByNumberAndIsReversed(
+        Optional<Invoice> optInvoice = this.getRepository().findByNumberAndIsReversed(
                 invoiceDTO.getNumber(),
                 Boolean.valueOf("FALSE") );
 
@@ -157,14 +128,11 @@ public class InvoiceJPAService implements InvoiceService {
     @Override
     public InvoiceDTO putInvoiceDTO(InvoiceDTO invoiceDTO) {
         Invoice invoice = invoiceMapper.invoiceDtoToInvoice(invoiceDTO);
-        Optional<Invoice> optInvoice = invoiceRepository.findByNumberAndIsReversed(invoice.getNumber(),
+        Optional<Invoice> optInvoice = this.getRepository().findByNumberAndIsReversed(invoice.getNumber(),
                 Boolean.valueOf("FALSE"));
         if (optInvoice.isPresent())
         {
             invoice.setId(optInvoice.get().getId());
-//            if (invoice.getIsReversed())
-//                throw new UpdateIsNotPossibleException("Update is not possible. Document is reversed, but you can create " +
-//                        "new document");
         }
 
         return invoiceMapper.invoiceToInvoiceDTO(save(invoice));
@@ -172,7 +140,7 @@ public class InvoiceJPAService implements InvoiceService {
 
     @Override
     public InvoiceDTO getInvoiceDTOByNumber(String aInvNumber) {
-        Optional<Invoice> optInvoice = invoiceRepository.findByNumber(aInvNumber);
+        Optional<Invoice> optInvoice = this.getRepository().findByNumber(aInvNumber);
         if (optInvoice.isPresent())
             return invoiceMapper.invoiceToInvoiceDTO(optInvoice.get());
         else{
@@ -183,7 +151,7 @@ public class InvoiceJPAService implements InvoiceService {
 
     @Override
     public Invoice findByNumber(String aInvNumber) {
-        Optional<Invoice> optInvoice = invoiceRepository.findByNumber(aInvNumber);
+        Optional<Invoice> optInvoice = this.getRepository().findByNumber(aInvNumber);
         if (optInvoice.isPresent())
             return optInvoice.get();
         else
@@ -192,7 +160,7 @@ public class InvoiceJPAService implements InvoiceService {
 
     @Override
     public Invoice findByNumberAndCompanyIssuerAndIsReversed(String aInvNumber, CompanyDTO companyIssuer, Boolean isReversed) {
-        Optional<Invoice> optInvoice = invoiceRepository.findByNumberAndCompanyIssuerAndIsReversed(
+        Optional<Invoice> optInvoice = this.getRepository().findByNumberAndCompanyIssuerAndIsReversed(
                 aInvNumber, companyMapper.companyDtoToCompany(companyIssuer), isReversed
         );
         if (optInvoice.isPresent())
@@ -203,7 +171,7 @@ public class InvoiceJPAService implements InvoiceService {
 
     @Override
     public Invoice findByNumberAndIsReversed(String aInvNumber, Boolean isReversed) {
-        Optional<Invoice> optionalInvoice = invoiceRepository.findByNumberAndIsReversed(aInvNumber,Boolean.valueOf("FALSE"));
+        Optional<Invoice> optionalInvoice = this.getRepository().findByNumberAndIsReversed(aInvNumber,Boolean.valueOf("FALSE"));
         if (optionalInvoice.isPresent())
             return optionalInvoice.get();
         else
